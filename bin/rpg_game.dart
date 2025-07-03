@@ -91,10 +91,8 @@ class Monster implements Object {
 }
 
 class RpgGame {
-  Character player = Character('용사'); //■■■■■ 플레이어 객체 생성 ■■■■■ 캐릭터라는 것을 멤버로 가짐.
-  // 플레이어 이름은 '용사'로 초기화됨. 나중에 입력받아서 변경할 수 있음.
-  List<Monster> monsterList = [
-    //몬스터 목록
+  Character player = Character('용사'); //■■■■■ 플레이어 객체를 멤버로 가짐. 플레이어 이름은 '용사'로 초기화됨. 나중에 입력받아서 변경할 수 있음.
+  List<Monster> monsterList = [ //몬스터 목록
     Monster('한대 맞으면 나가리 되는 말벌', 10, 25),
     Monster('더러운 러브버그', 15, 20),
     Monster('무시무시한 거미', 25, 20),
@@ -102,10 +100,14 @@ class RpgGame {
   ];
   int monsterClearCount = 0;
   //몬스터 처치 횟수, 물리친 몬스터의 갯수보다 작아야 함. 추후에 처치 횟수가 List의 length와 같아지면 게임 클리어로 간주함.■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-  bool wantsToContinue = true;
+  late final int initialMonsterListLength = monsterList.length; 
+  // 초기의 몬스터 목록에 있는 몬스터의 수! 이걸 왜 알아야하냐면 나중에 게임 클리어 판단할 때 필요하다. 
+  // 게임시작할때 정해진 몬스터의 갯수만큼 다 쓰러뜨렸는지 확인하기 위해서 갯수를 저장해놓는것이다. 
+  //late를 쓴 이유는, 이 값은 클래스가 완전히 생성된 뒤에야 알 수 있는 값
+  //하지만 "변경되지 않게"는 하고 싶기 때문에 late final을 같이 쓰는 거
+    bool wantsToContinue = true;
   //게임을 계속 진행하고 싶은 의사. 몬스터 처치 후에 물어봄 이 클래스의 continue 메서드에서 변경 되는 애임.
-  late Monster //
-  stagedMonster; //소환된 몬스터를 저장할 변수. 몬스터와 전투를 할 때 사용됨. 초기값은 null로 설정됨. 나중에 getRandomMonster() 메서드에서 랜덤으로 몬스터를 소환해서 대입함.
+  late Monster stagedMonster; //소환된 몬스터를 저장할 변수. 몬스터와 전투를 할 때 사용됨. 초기값은 null로 설정됨. 나중에 getRandomMonster() 메서드에서 랜덤으로 몬스터를 소환해서 대입함.
 
   void characterNaming() {
     //메서드: Character 이름 등록 해주기
@@ -139,10 +141,7 @@ class RpgGame {
 
   void getRandomMonster() {
     //메서드: 몬스터 소환하기 - 몬스터 리스트에서 랜덤으로 몬스터를 선택해서 stagedMonster로 대입한다.
-    stagedMonster =
-        monsterList[Random().nextInt(
-          monsterList.length,
-        )]; //몬스터리스트에 있는 몬스터 중 랜덤으로 하나를 선택해서 stagedMonster로 대입한다.
+    stagedMonster = monsterList[Random().nextInt(monsterList.length)]; //몬스터리스트에 있는 몬스터 중 랜덤으로 하나를 선택해서 stagedMonster로 대입한다.
     print("--------------------------------------------------------");
     print("용사님~~~살려주시라요~~~!!!");
     print("새로운 몬스터가 나타나 위협하고 있단 말이거든요잉~~ㄷ아아아아아악!!!!꺍");
@@ -152,6 +151,7 @@ class RpgGame {
   }
 
   void battle() {
+    
     //메서드: 몬스터와 전투하기
     //몬스터리스트에 랜덤으로 몬스터를 하나 선택한다.-해결함
     //그 몬스터가 stagedMonster로 대입된다.-해결함
@@ -171,6 +171,7 @@ class RpgGame {
       player.showStatus(); // 플레이어의 상태를 출력한다.
       stagedMonster.showStatus(); // 몬스터의 상태를 출력한다.
       }
+    monsterList.remove(stagedMonster); //이제 소환된 몬스터는 몬스터리스트에서 필요 없어~ 삭제! 이제 소환할 때, 중복되는 애들이 소환되지 않을거임
     monsterClearCount++; // 몬스터 처치 횟수를 1 증가시킨다.
     print("--------------------------------------------------------");
     print("축하드리옵니다 나~리~!!! 벌레를 $monsterClearCount마리 째 때려잡으셨다는 말이거든요잉~");
@@ -178,7 +179,13 @@ class RpgGame {
 
   void playerTurn() {
     print('${player.name}의 턴이거든요잉~~~ ');
+  // 	입력값 조건이 1번일 때:
+  // 	캐릭터 객체의 attack 메서드를 실행해서 game 클래스의
+  // 	stagedMonster 객체(game클래스의 멤버변수 중 하나)의 hp값을 바꾸고싶다.
 
+  // 	입력값 조건이 2번일 때:
+  // 	캐릭터 객체의 defend 메서드를 실행해서
+  // 	캐릭터 객체의 hp를 올려준다.
     try {
       //일단 똑바로 안쓸 수 있으니깐, try 로 예외가 나올 수 있는 코드블록임을 인지하도록 하자
       print("--------------------------------------------------------");
@@ -200,50 +207,58 @@ class RpgGame {
     }
   }
 
-  // 	입력값 조건이 1번일 때:
-  // 	캐릭터 객체의 attack 메서드를 실행해서 game 클래스의
-  // 	stagedMonster 객체(그냥 멤버변수 중 하나)의 hp값을 바꾸고싶다.
-
-  // 	입력값 조건이 2번일 때:
-  // 	캐릭터 객체의 defend 메서드를 실행해서
-  // 	stagedMonster의 공격력의 ~/2 수를
-  // 	캐릭터 객체의 hp를 올려준다.
-
-  //플레이어의 턴이라느 함수...만드러야함.}
-
-  void continueGame() {
-    // 이 메서드 나중에 gameStart() 메서드에서 몬스터 처치 후에 호출되도록 해야겠다.■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  void continueGame() { // 몬스터 소탕을 지속할지 묻는 메서드.
     while (true) {
-      //지금은 while + switch문으로 했는데, 나중에 예외 처리 try-catch문으로 바꿔야함!!!■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
       print("--------------------------------------------------------");
       print("앞으로 더 나가볼까요 나으리~? 계속 진행하실랑가요? (y/n)");
       String? input = stdin.readLineSync() ?? ''; //사용자로부터 입력 받기
       switch (input) {
-        case 'y' || 'Y':
+        case 'y': //case 문 쓸때는 or(||) 연산자를 쓰는게 말이 안된다고 함.이게 맞다함.
+        case 'Y':
           wantsToContinue = true; //게임을 계속 진행하고 싶은 의사(wantsToContinue)를 true로 설정
           print("게임을 계속 진행합니다.");
-          break;
-        case 'n' || 'N':
-          wantsToContinue =
-              false; //게임을 계속 진행하고 싶은 의사(wantsToContinue)를 false로 설정
+          break;//이걸로 switch 조건문을 나간 후, 바깥에 있는 break 한 번 더 있는걸로 while 반복문도 나가야함.
+        case 'n':
+        case 'N':
+          wantsToContinue = false; //게임을 계속 진행하고 싶은 의사(wantsToContinue)를 false로 설정
           print("고생하셨습니다 나으리~ 게임을 저장하실랑가요잉?");
           // 나중에 게임 저장하는 로직 추가해야함.
           break;
         default:
           print("잘못된 입력입니다.");
+          continue;// 다시 질문해야함!
       }
+      break; //이걸로 while 반복문 나감!
     }
+  }
+
+  void gameClear(){
+    print("축하합니다요~~~ 아주 그냥 모오든 벌레들을 싸-악 쓸어버리셨습니다요~ 두곡리 마을에는 평화가 찾아왔다 이말이거든요잉~");
+    print("즐겨주셔서 감사합니다잉~");
+  }
+  void gmaeOver() {
+    if(player.hp<0){
+      print("아이고? 용사님 돌아가셨네? 용사님~ 일어나세요~ 일하셔야죠~ 나중에 다시 도전하세요잉~");
+    }
+  }
+
+  void saveGame() {
+
   }
 }
 
 void main() {
-  RpgGame game = RpgGame(); //■■■■■ 게임 객체 생성 ■■■■■
-  game.characterNaming(); //■■■■■ 캐릭터 이름 등록 메서드 호출 ■■■■■
-  game.gameStart(); //■■■■■ 게임 시작 메서드 호출 ■■■■■
+  RpgGame game = RpgGame(); //■■■■■ 게임 객체 생성 
+  game.characterNaming(); //■■■■■■■■ 캐릭터 이름 등록 메서드 호출 
+  game.gameStart(); //■■■■■■■■■■■■■■ 게임 시작 메서드 호출 
   do {
-    game.getRandomMonster(); //■■■■■ 랜덤으로 몬스터 소환 메서드■■■■■
-    game.battle();
-    game.continueGame(); // ■■■■■ 턴제 전투 시작 메서드■■■■■
-  } while (game
-      .wantsToContinue); // 게임을 계속 진행하고 싶은 의사(wantsToContinue)가 true인 동안 반복
+    game.getRandomMonster(); //■■■■■ 랜덤으로 몬스터 소환 메서드
+    game.battle();// ■■■■■■■■■■■■■■■ 턴제 전투 시작 메서드
+    game.continueGame(); // ■■■■■■■■ 전투 계속할건지 묻기 메서드
+  } while (game.wantsToContinue && game.monsterClearCount  < game.initialMonsterListLength);
+  // 게임을 계속 진행하고 싶은 의사(wantsToContinue)가 true이며, 
+  //몬스터리스트 안의 모든 몬스터를 모두 해치우기 전까지 반복
+  
+    game.gameClear(); 
+  
 }
