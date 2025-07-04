@@ -33,34 +33,35 @@ Character loadCharacterStats(RpgGame game) {
   }
 }
 
-abstract class Object {
-  //■■■■■ abstract 클래스인 Object 정의  (Character, Monster 모두 이 클래스를 상속받음) ■■■■■
+abstract class Object {     //■■■■■ abstract 클래스인 Object 정의  (Character, Monster 모두 이 클래스를 상속받음) ■■■■■
   String name = '무명';
   int health = 0; //체력
-  int attack = 0; //공격력
+  int damage = 0; //공격력
   int defense = 0; //방어력
   void showStatus() {
-    print("$name - 체력: $health, 공격력: $attack, 방어력: $defense");
+    print("$name - 체력: $health, 공격력: $damage, 방어력: $defense");
   }
 }
 
-class Character implements Object {
-  //■■■■■ Character 클래스 정의 (Object 클래스 상속받았음) ■■■■■
+class Character implements Object {  //■■■■■ Character 클래스 정의 (Object 클래스 상속받았음) ■■■■■
+  @override
   String name; //이름 나중에 입력받아서 캐릭터 객체 생성해야 됨 ㅎ
+  @override
   int health; //오버라이드 됨
-  int attack; //오버라이드됨
+  @override
+  int damage; //오버라이드됨
+  @override
   int defense; //방어력 멤버 변수 추가
 
-  Character(
-    this.name,
+  Character(    this.name,
     this.health,
-    this.attack,
+    this.damage,
     this.defense,
   ); //생성자: 이름을 입력받아 초기화
 
   @override
   void showStatus() {
-    print("$name용사님 - 체력: $health, 공격력: $attack, 방어력: $defense");
+    print("$name용사님 - 체력: $health, 공격력: $damage, 방어력: $defense");
     //캐릭터의 상태를 출력하는 메서드
     //호출될 위치는 RpgGame 클래스의 battle에서 character,monster 한대씩 때리고 나서 호출됨.
   }
@@ -68,21 +69,14 @@ class Character implements Object {
   void attackMonster(Monster stagedMonster) {
     // 현재 등장해 있는 몬스터의 hp변수 값을 캐릭터의 공격력만큼 빼준다.
     print("--------------------------------------------------------");
-    print(
-      "체력 ${stagedMonster.health}있는 ${stagedMonster.name}에게 -$attack 만큼 피해를 줬다는거 아니겠음~?",
-    );
+    print("체력 ${stagedMonster.health}있는 ${stagedMonster.name}에게 -$damage 만큼 피해를 줬다는거 아니겠음~?");
     //이 stagedMonster는 RpgGame 클래스의 멤버변수로 선언되어 있음.
-    stagedMonster.health -= attack; //소환된 몬스터의 hp에서 캐릭터의 공격력만큼 감소시킨다.
+    stagedMonster.health -= damage; //소환된 몬스터의 hp에서 캐릭터의 공격력만큼 감소시킨다.
     if (stagedMonster.health > 0) {
-      print(
-        "${stagedMonster.name}의 hp가 ${stagedMonster.health}로 날라가 버렸다는 거 아니겠음~? 침하하~",
-      );
-      //몬스터의 hp를 출력한다.
+      print("${stagedMonster.name}의 hp가 ${stagedMonster.health}로 날라가 버렸다는 거 아니겠음~? 침하하~");//몬스터의 hp를 출력한다.
     } else {
       print("${stagedMonster.name} 이거 아주 개털이 됐다~~ 말이거든요잉~!");
       //몬스터의 hp가 0 이하가 되면 몬스터가 쓰러졌다고 출력한다.
-      // 나중에 몬스터 처치 횟수 증가시키는 로직 추가해야함.
-      // RpgGame 클래스의 monsterClearCount 변수를 1 증가시킨다.
     }
   }
 
@@ -94,73 +88,72 @@ class Character implements Object {
     int healPoint = Random().nextInt(stagedMonster.maxDamage ~/ 3) + 1;
     health += healPoint; // 몬스터의 공격력의 1~ 1/3만큼 랜덤으로 체력을 회복한다.
     print("용사님이 을~매나 편안했으면 체력을 +$healPoint 만큼 회복했다는거 아니겄슈~?");
-  } //메서드: 방어하기
+  }
 }
 
-class Monster implements Object {
-  //■■■■■ Monster 클래스 정의 (Object 클래스 상속받았음) ■■■■■
+class Monster implements Object {    //■■■■■ Monster 클래스 정의 (Object 클래스 상속받았음) ■■■■■
+  @override
   String name; //이름 나중에 입력받아서 몬스터 객체 생성해야 됨 ㅎ
-  int health; //객체 생성자에서 초기화
+  @override
+  int health;    //객체 생성자에서 초기화
   int maxDamage; //랜덤으로 지정할 공격력 범위 최대값(몬스터마다 다름)
-  int defense = 0;
-  late int attack; // 진짜 몬스터의 공격력(랜덤으로 지정됨, attackCharacter 메서드에서 매 공격시마다 새롭게 정해짐)
+  @override
+  int defense = 0; //몬스터는 방어력은 없다고 가정함. 몬스터는 공격만 한다.
+  @override
+  late int damage; // 진짜 몬스터의 공격력(랜덤으로 지정됨, attackCharacter 메서드에서 매 공격시마다 새롭게 정해짐)
 
   Monster(this.name, this.health, this.maxDamage); //생성자: 이름, 체력, 공격력을 입력받아 초기화
 
-  void attackCharacter(Character character) {
-    //플레이어를 공격하려면 플레이어의 hp를 몬스터의 공격력만큼 감소시켜야 함.
-    //그렇다면 몬스터의 공격력을 먼저랜덤으로 정해야함.(매 턴마다 새롭게 정해야함)
+  @override
+  void showStatus() {    //몬스터의 상태를 출력하는 메서드
+    //호출될 위치는 RpgGame 클래스의 battle메서드에서 character, monster 둘이 한대씩 때리고 나서 호출됨.
+    print("$name - 체력: $health, 최대공격력: $maxDamage");
+  }
+
+  void attackCharacter(Character character) { // 몬스터가 플레이어를 공격하는 메서드
+    //플레이어를 공격하려면 플레이어의 health를 몬스터의 공격력만큼 감소시켜야 함.
+    //그렇다면 몬스터의 공격력을 먼저랜덤으로 정해야함.(매 공격마다 새롭게 정해야함)
     //몬스터의 공격력의 조건: player의 방어력< 몬스터의 공격력 <= 몬스터의 최대공격력
-    attack = Random().nextInt(maxDamage); // 몬스터의 공격력을 랜덤으로 설정한다.
-    if (attack <= character.defense) {
-      //몬스터의 공격력이 플레이어의 방어력보다 낮게 나오면
-      attack = character.defense + 1;
-    } // 그냥 player의 방어력보다 +1을 더해서 설정한다.
+    damage = Random().nextInt(maxDamage); // 몬스터의 공격력을 랜덤으로 설정한다.
+    if (damage <= character.defense) {    //몬스터의 공격력이 플레이어의 방어력보다 낮게 나오면
+      damage = character.defense + 1;     // 그냥 player의 방어력보다 +1을 더해서 재설정한다.
+    } 
 
     character.health -=
-        (attack - character.defense); //플레이어의 hp에서 (몬스터의 공격력-플레이어 방어력)만큼 감소시킨다.
+        (damage - character.defense); //플레이어의 hp에서 (몬스터의 공격력-플레이어 방어력)만큼 감소시킨다.
     print("--------------------------------------------------------");
-    print("아이고오~~~!!!우리 용사님이이 글쎄~ $name에게 -$attack 만큼 공격을 그냥 받으셨는데,");
-    print("용사님이 몸이 딴딴해가지고 피가 -${attack - character.defense}밖에 안깎여가지고 ");
+    print("아이고오~~~!!!우리 용사님이이 글쎄~ $name에게 -$damage 만큼 공격을 그냥 받으셨는데,");
+    print("용사님이 몸이 딴딴해가지고 피가 -${damage - character.defense}밖에 안깎여가지고 ");
     print("피통이 ${character.health}가 남았다는거 아니겠음~?");
     //몬스터가 플레이어를 공격했을 때 출력되는 메시지
   }
-
-  void showStatus() {
-    //몬스터의 상태를 출력하는 메서드
-    //호출될 위치는 RpgGame 클래스의 battle에서 character,monster 한대씩 때리고 나서 호출됨.
-    print("$name - 체력: $health, 최대공격력: $maxDamage");
-  }
 }
 
-class RpgGame {
-  late Character character;
-  List<Monster> monsterList = [
-    //몬스터 목록
+class RpgGame { //■■■■■ RpgGame 클래스 정의 (게임의 전체 로직(게임의 상태, 캐릭터, 몬스터 등을)관리하는 클래스) ■■■■■
+  late Character character; // 캐릭터 객체를 저장할 변수. 초기값은 null로 설정됨. 나중에 loadCharacterStats() 메서드에서 캐릭터 객체를 생성해서 대입함.
+  late Monster stagedMonster; //소환된 몬스터를 저장할 변수. 몬스터와 전투를 할 때 사용됨. 초기값은 null로 설정됨. 나중에 getRandomMonster() 메서드에서 랜덤으로 몬스터를 소환해서 대입함.
+
+  List<Monster> monsterList = [    //몬스터 목록
     Monster('한대 맞으면 나가리 되는 말벌', 10, 25),
     Monster('더러운 러브버그', 15, 20),
     Monster('무시무시한 거미', 25, 20),
     Monster('사나운 황소개구리', 30, 25),
   ];
-  int monsterClearCount = 0;
-  //몬스터 처치 횟수, 물리친 몬스터의 갯수보다 작아야 함. 추후에 처치 횟수가 List의 length와 같아지면 게임 클리어로 간주함.■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  int monsterClearCount = 0;  //몬스터 처치 횟수, 물리친 몬스터의 갯수보다 작아야 함. 추후에 처치 횟수가 List의 length와 같아지면 게임 클리어로 간주함.
   late final int initialMonsterListLength = monsterList.length;
   // 초기의 몬스터 목록에 있는 몬스터의 수! 이걸 왜 알아야하냐면 나중에 게임 클리어 판단할 때 필요하다.
   // 게임시작할때 정해진 몬스터의 갯수만큼 다 쓰러뜨렸는지 확인하기 위해서 갯수를 저장해놓는것이다.
-  //late를 쓴 이유는, 이 값은 클래스가 완전히 생성된 뒤에야 알 수 있는 값
-  //하지만 "변경되지 않게"는 하고 싶기 때문에 late final을 같이 쓰는 거
-  bool wantsToContinue = true;
-  //게임을 계속 진행하고 싶은 의사. 몬스터 처치 후에 물어봄 이 클래스의 continue 메서드에서 변경 되는 애임.
-  late Monster
-  stagedMonster; //소환된 몬스터를 저장할 변수. 몬스터와 전투를 할 때 사용됨. 초기값은 null로 설정됨. 나중에 getRandomMonster() 메서드에서 랜덤으로 몬스터를 소환해서 대입함.
+  //late를 쓴 이유는, 이 값은 클래스가 완전히 생성된 뒤에야 알 수 있는 값 // 몬스터 목록이 실제로 생성되고 난 후에야 알 수 있는 값이기 때문에 late로 선언한다. 
+  //멤버변수는 두개가 동시에 이렇게 생성될 수 없다고 함. 그래서 객체가 생기고 monsterList가 생성된 후에 초기화된다.
+  //"변경되지 않게"는 하고 싶기 때문에 final을 같이 쓰는 거
+  bool wantsToContinue = true;  //유저가 게임을 계속 진행하고 싶은 의사. 몬스터 처치 후에 물어봄 이 클래스의 continue 메서드에서 변경 되는 애임.
+  
+  RpgGame() { // 임시로 기본값을 넣어줍니다. (이후 characterNaming에서 이름을 바꿉니다)
+    character = Character('용사', 0, 0, 0); //이 줄은 RpgGame 객체를 생성할때, 자동으로 이 character 객체가 생성되게 한다.
+  }// 이렇게 생긴 생성자는 생소할 수 있지만, 생성자와 {}중괄호를 같이 쓰면 생성하는 동시에 괄호안에 있는 작업을 수행한다.
+  // Dart에서는 클래스의 생성자에서 멤버 변수를 초기화할 때 주로 사용된다.
 
-  RpgGame() {
-    // 임시로 기본값을 넣어줍니다. (이후 characterNaming에서 이름을 바꿉니다)
-    character = Character('용사', 100, 10, 5);
-  }
-
-  String characterNaming() {
-    //메서드: Character 이름 등록 해주기
+  String characterNaming() {//메서드: Character 이름 등록 해주기
     print("--------------------------------------------------------");
     print("'만흥리 벌레 때려잡는 뒤집어지는 호들갑 용사의 킹받는 모험 시리즈 : 1 '에 오신 것을 환영합니다요");
     while (true) {
@@ -180,21 +173,19 @@ class RpgGame {
     print("--------------------------------------------------------");
     print("용사님의 존함이 ${character.name}으로 설정되었다~ 그 말이거든요잉~?");
     return character.name; //입력받은 캐릭터 이름을 반환한다.
-    //이제 캐릭터 이름을 가지고 loadCharacterStats() 함수를 호출해서 캐릭터 객체를 생성한다.
-    //캐릭터 객체는 RpgGame 클래스의 character 변수에 저장된다.
+    //이제 이 캐릭터 이름을 가지고 loadCharacterStats() (우리 코드 맨 위에 있는 함수)의 매개변수로 값이 가서 캐릭터 객체를 생성할 때 이름을 제공한다.
+    //이렇게 생성된 캐릭터 객체는 RpgGame 클래스의 character 변수에 저장된다.
   }
 
-  void gameStart() {
-    //메서드: 게임 시작 해주기
+  void gameStart() {    //메서드: 게임 시작 해주기
     print("--------------------------------------------------------");
     print("게임을 시작합니다!");
     print(
-      "${character.name} - 체력: ${character.health} , 공격력: ${character.attack} , 방어력: ${character.defense}",
+      "${character.name} - 체력: ${character.health} , 공격력: ${character.damage} , 방어력: ${character.defense}",
     );
   }
 
-  void getRandomMonster() {
-    //메서드: 몬스터 소환하기 - 몬스토리스트에서 남은 몬스터 중 랜덤으로 한 마리를 소환해 stagedMonster에 할당한다.
+  void getRandomMonster() {    //메서드: 몬스터 소환하기 - 몬스토리스트에서 남은 몬스터 중 랜덤으로 한 마리를 소환해 stagedMonster에 할당한다.
      print("남은 몬스터 리스트: ${monsterList.map((m) => m.name).toList()}");
   print("남은 몬스터 수: ${monsterList.length}");
     stagedMonster =
@@ -209,9 +200,9 @@ class RpgGame {
     );
   }
 
-  void battle() {
+  void battle() {//메서드: 몬스터와 전투하기
     // 플레이어와 몬스터가 번갈아가며 턴을 진행한다. 몬스터의 체력이 0 이하가 되면 전투 종료.
-    //메서드: 몬스터와 전투하기
+    
     //몬스터리스트에 랜덤으로 몬스터를 하나 선택한다.-해결함
     //그 몬스터가 stagedMonster로 대입된다.-해결함
     // stagedMonster와 character 객체가 전투를 시작한다.어떻게?  playerTurn()과 monsterTurn()을 반복한다.
@@ -246,8 +237,8 @@ class RpgGame {
     print("축하드리옵니다 나~리~!!! 벌레를 $monsterClearCount마리 째 때려잡으셨다는 말이거든요잉~");
   }
 
-  void playerTurn() {
-    // 플레이어의 턴: 공격 또는 방어를 선택한다.
+  void playerTurn() {// 플레이어의 턴: 공격 또는 방어를 선택한다.
+    
     print('${character.name}의 턴이거든요잉~~~ ');
     // 	입력값 조건이 1번일 때:
     // 	캐릭터 객체의 attack 메서드를 실행해서 game 클래스의
@@ -277,8 +268,8 @@ class RpgGame {
     }
   }
 
-  void continueGame() {
-    // 전투 후, 게임을 계속할지 플레이어에게 묻는다.
+  void continueGame() {// 전투 후, 게임을 계속할지 플레이어에게 묻는다.
+    
     while (true) {
       print("--------------------------------------------------------");
       print("앞으로 더 나가볼까요 나으리~? 계속 진행하실랑가요? (y/n)");
@@ -309,7 +300,7 @@ class RpgGame {
     print("즐겨주셔서 감사합니다잉~");
   }
 
-  void gmaeOver() {
+  void gameOver() {
         // 플레이어가 사망하면 호출된다.
     if (character.health < 0) {
       print("아이고? 용사님 돌아가셨네? 용사님~ 일어나세요~ 일하셔야죠~ 나중에 다시 도전하세요잉~");
